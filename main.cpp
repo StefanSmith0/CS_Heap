@@ -3,12 +3,6 @@
   4/3/2022
   Heap
 
-  Commands:
-  add - Adds a student to the list.
-  delete - Removes a student from the list.
-  print - Prints list to console.
-  quit - Ends the program and deletes the list.
-
   Code Used:
   - printBT by Adrian Schneider - https://stackoverflow.com/users/2631225/adrian-schneider
  */
