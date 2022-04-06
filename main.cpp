@@ -17,6 +17,7 @@
 #include <time.h>
 #include <string>
 #include <cstring>
+#include <fstream>
 
 using namespace std;
 
@@ -26,6 +27,9 @@ void maxHeapify(int *array, int heapSize, int i);
 void sort(int *array, int &heapSize);
 void siftdown(int *array, int heapSize, int i);
 void build(int *array, int heapSize);
+void stringToHeap(int *array, char* input, int &heapSize);
+int spaces(char* input);
+void stringFromFile(char* input, char* inputFileName, bool &success);
 
 int main() {
   int heapSize = 101;
@@ -33,37 +37,21 @@ int main() {
   string prefix = "";
   char input[30];
   bool validCmd = false;
-  cout << "Fill heap manually, randomly, or by file? (m/r/f): ";
   while(!validCmd) {
+    cout << "Fill heap manually, randomly, or by file? (m/r/f): ";
     cin >> input;
     cin.clear();
     cin.ignore();
+    if(!strcmp(input, "q")) {
+      return 0;
+    }
     if(!strcmp(input, "m")) {
       char manual[350] = {0};
       char* manualInput = manual;
       int newHeapSize = 0;
       cout << "Enter numbers separated by spaces, hit return to finish." << endl;
       cin.getline(manualInput, 350);
-      int intFromInput;
-      int len = sizeof(manual)/sizeof(manual[0]);
-      for(int i = 1; i < manual.size(); i++) {
-	sscanf(manualInput, "%d", &intFromInput);
-	heap[i] = intFromInput;
-	newHeapSize++;
-	if(intFromInput < 10) {
-	  manualInput += 2;
-	}
-	else if(intFromInput < 100) {
-	  manualInput += 3;
-	}
-	if(intFromInput < 1000) {
-	  manualInput += 4;
-	}
-	else {
-	  manualInput += 5;
-	}
-      }
-      heapSize = newHeapSize;
+      stringToHeap(heap, manualInput, heapSize);
       validCmd = true;
     }
     else if(!strcmp(input, "r")) { 
@@ -74,17 +62,21 @@ int main() {
       validCmd = true;
     }
     else if(!strcmp(input, "f")) {
-
-      validCmd = true;
+      char fileInput[350];
+      char fileName[30];
+      cout << "File name: ";
+      cin.getline(fileName, 30);
+      stringFromFile(fileInput, fileName, validCmd);
+      if(validCmd) {
+	stringToHeap(heap, fileInput, heapSize);
+      }
     }
     else {
       cout << "Command not recognized." << endl;
-      cout << "(m/r/f): ";
     }
   }
   
   printTree(heapSize, false, heap, 1, prefix);
-  prefix = "";
   
   cout << "Building..." << endl;
   build(heap, heapSize);
@@ -93,6 +85,62 @@ int main() {
   cout << "Sorting..." << endl;
   sort(heap, heapSize);
   return 0;
+}
+
+//Fills a char array from the first line of a file
+void stringFromFile(char* input, char* inputFileName, bool &success) {
+  fstream file;
+  string output;
+  int length = 0;
+  file.open(inputFileName, ios::in);
+  if(file.is_open()) {
+    getline(file, output);
+    file.close();
+    strcpy(input, output.c_str());
+    success = true;
+  }
+  else {
+    cout << "Couldn't open file." << endl;
+  }
+}
+
+//Counts the spaces in a string
+int spaces(char* input) {
+  int output = 0;
+  int it = 0;
+  while(input[it] != '\0') {
+    if(input[it] == ' ') {
+      output++;
+    }
+    it++;
+  }
+  return output;
+}
+
+//Extracts ints from a string, adds them to heap
+void stringToHeap(int *array, char* input, int& heapSize) {
+  int newHeapSize = 1;
+  int intFromInput = 0;
+  int intspaces = spaces(input);
+  for(int i = 1; i < intspaces + 2; i++) {
+    sscanf(input, "%d", &intFromInput);
+    array[i] = intFromInput;
+    newHeapSize++;
+    if(intFromInput < 10) {
+      input += 2;
+    }
+    else if(intFromInput < 100) {
+      input += 3;
+    }
+    else if(intFromInput < 1000) {
+      input += 4;
+    }
+    else {
+      input += 5;
+    }
+  }
+  heapSize = newHeapSize;
+  cout << endl;
 }
 
 //Builds heap
